@@ -58,7 +58,7 @@ class Books extends React.Component {
 
     deleteBook = (book) => {
         this.setState({ selectedBook: book })
-        this.props.deleteBook(this.props.books, book)
+        this.props.deleteBook(book)
     }
 
     render() {

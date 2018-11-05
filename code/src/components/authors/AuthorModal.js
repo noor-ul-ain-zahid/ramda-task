@@ -27,7 +27,6 @@ export default class AuthorModal extends React.Component {
     }
 
     componentDidMount() {
-        // custom rule will have name 'isPasswordMatch'
         ValidatorForm.addValidationRule('alreadyExists', (value) => {
             if (this.state.error !== '') {
                 return false;
