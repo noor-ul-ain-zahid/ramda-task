@@ -2,26 +2,29 @@ import React from 'react'
 import { connect } from "react-redux";
 import { bindActionCreators } from 'redux';
 import { addAuthor, deleteAuthor, updateAuthor, deleteBooks } from '../../actions/Actions';
-import { notExisting } from '../../parser/helpers'
 import AuthorsList from './AuthorsList'
 import AuthorModal from './AuthorModal'
 
 class Authors extends React.Component {
     constructor(props) {
         super(props)
-        this.
-            state = {
-                showAuthorModal: false,
-                action: '',
-                error: '',
-                lastId: 0
+        this.state = {
+            showAuthorModal: false,
+            action: '',
+            lastId: 0,
+            selectedAuthor: {
+                name: '',
+                dob: '',
+                books: '',
+                id: ''
             }
+        }
     }
-    toggleState = (action) => {
+    toggleState = action => {
         this.setState({ showAuthorModal: !this.state.showAuthorModal, action: action });
     }
 
-    showEditAuthorModal = (author) => {
+    showEditAuthorModal = author => {
         this.setState({
             selectedAuthor: author,
             showAuthorModal: !this.state.showAuthorModal,
@@ -29,37 +32,25 @@ class Authors extends React.Component {
         })
     }
 
-    addAuthor = (data) => {
-
-        const author = { "id": this.state.lastId + 1, ...data },
-            { authors, addAuthor } = this.props
-
-        if (notExisting(authors, author)) {
-            addAuthor(author)
-            this.setState({ 
-                lastId: author.id, 
-                error: '',
+    addAuthor = data => {
+        const author= { "id": this.state.lastId + 1, ...data }
+            this.props.addAuthor(author)
+            this.setState({
+                lastId: author.id,
                 showAuthorModal: !this.state.showAuthorModal,
-                action: '' })
-        }
-        else { this.setState({ error: 'error' }) }
+                action: ''
+            })
     }
+    updateAuthor = author => {
+        const updatedData = { "id": this.state.selectedAuthor.id, ...author }
+        this.props.updateAuthor(this.state.selectedAuthor, updatedData)
+        this.toggleState('')
 
-    updateAuthor = (author) => {
-        const updatedData = { "id": this.state.selectedAuthor.id, ...author },
-            { authors, updateAuthor } = this.props
-
-        if (notExisting(authors, updatedData)) {
-            updateAuthor(this.state.selectedAuthor, updatedData)
-            this.toggleState('')
-        }
-        else { this.setState({ error: 'error' }) }
     }
-    
-    deleteAuthor = (author) => {
+    deleteAuthor = author => {
         this.setState({ selectedAuthor: author })
-        this.props.deleteBooks('author', author.name)
-        this.props.deleteAuthor( author)
+        this.props.deleteBooks('publisher', author.name)
+        this.props.deleteAuthor(author)
     }
 
     render() {
@@ -78,8 +69,10 @@ class Authors extends React.Component {
                     open={showAuthorModal}
                     action={action}
                     handleClose={this.toggleState}
-                    actionType={action == 'add' ? this.addAuthor : this.updateAuthor}
+                    title={action === 'add' ? 'Add Author' : 'Edit Author Details'}
+                    onSubmit={action === 'add' ? this.addAuthor: this.updateAuthor}
                     author={selectedAuthor}
+                    lastId={action === 'add' ? this.state.lastId + 1 : this.state.selectedAuthor.id}
                 />
             </div>
         )
@@ -97,7 +90,7 @@ function mapDispatchToProps(dispatch) {
         addAuthor,
         updateAuthor,
         deleteAuthor,
-        deleteBooks
+        deleteBooks,
     }, dispatch)
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Authors);

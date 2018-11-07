@@ -5,7 +5,7 @@ import Select from '@material-ui/core/Select';
 const SelectOptions = (props) => {
     const { data, name } = props
     let title = ''
-    if (name == 'author')
+    if (name === 'author')
         title = "Authors"
     else
         title = 'Publishers'

@@ -2,7 +2,6 @@ import React from 'react'
 import { connect } from "react-redux";
 import { bindActionCreators } from 'redux';
 import { addPublisher, deletePublisher, updatePublisher, deleteBooks } from '../../actions/Actions';
-import {notExisting} from '../../parser/helpers'
 import PublishersList from './PublishersList'
 import PublisherModal from './PublisherModal'
 
@@ -12,50 +11,45 @@ class Publishers extends React.Component {
         this.state = {
             showPublisherModal: false,
             action: '',
-            error: '',
-            lastId: 0
+            lastId: 0,
+            selectedPublisher: {
+                name: '',
+                address: '',
+                books: '',
+                id: ''
+            }
         }
     }
-    toggleState = (action) => {
+    toggleState = action => {
         this.setState({ showPublisherModal: !this.state.showPublisherModal, action: action });
     }
 
-    showEditPublisherModal = (publisher) => {
-        this.setState({ 
+    showEditPublisherModal = publisher => {
+        this.setState({
             selectedPublisher: publisher,
             showPublisherModal: !this.state.showPublisherModal,
-            action:'edit'
-         })
+            action: 'edit'
+        })
     }
 
-    addPublisher = (data) => {
-        const publisher = { "id":  this.state.lastId+1, ...data },
-            { publishers, addPublisher } = this.props
-
-        if (notExisting(publishers, publisher)) {
-            addPublisher(publisher)
+    addPublisher = data => {
+        const publisher = { "id": this.state.lastId + 1, ...data }
+            this.props.addPublisher(publisher)
             this.setState({
                 lastId: publisher.id,
-                error: '',
                 showPublisherModal: !this.state.showPublisherModal,
-                action:''
+                action: ''
             })
-        }
-        else { this.setState({ error: 'error' }) }
     }
-    updatePublisher = (publisher) => {
-        const updatedData = { "id": this.state.selectedPublisher.id, ...publisher },
-            { publishers, updatePublisher } = this.props
+    updatePublisher = publisher => {
+        const updatedData = { "id": this.state.selectedPublisher.id, ...publisher }
+        this.props.updatePublisher(this.state.selectedPublisher, updatedData)
+        this.toggleState('')
 
-        if (notExisting(publishers,updatedData)) {
-            updatePublisher(this.state.selectedPublisher, updatedData)
-            this.toggleState('')
-        }
-        else { this.setState({ error: 'error' }) }
     }
-    deletePublisher = (publisher) => {
+    deletePublisher = publisher => {
         this.setState({ selectedPublisher: publisher })
-        this.props.deleteBooks('publisher',publisher.name)
+        this.props.deleteBooks('publisher', publisher.name)
         this.props.deletePublisher(publisher)
     }
 
@@ -75,9 +69,11 @@ class Publishers extends React.Component {
                     open={showPublisherModal}
                     action={action}
                     handleClose={this.toggleState}
-                    actionType={action == 'add' ? this.addPublisher : this.updatePublisher}
+                    title={action === 'add' ? 'Add Publisher' : 'Edit Publisher Details'}
+                    onSubmit={action === 'add' ? this.addPublisher : this.updatePublisher}
                     publisher={selectedPublisher}
                     error={error}
+                    lastId={action === 'add' ? this.state.lastId + 1 : this.state.selectedPublisher.id}
                 />
             </div>
         )
@@ -95,7 +91,7 @@ function mapDispatchToProps(dispatch) {
         addPublisher,
         updatePublisher,
         deletePublisher,
-        deleteBooks
+        deleteBooks,
     }, dispatch)
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Publishers);

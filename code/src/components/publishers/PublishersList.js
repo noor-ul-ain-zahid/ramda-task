@@ -32,5 +32,4 @@ const PublishersList = (props) => {
         </div>
     )
 }
-
 export default PublishersList;

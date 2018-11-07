@@ -4,7 +4,6 @@ export const addBook = (newBook) => {
     return {
         type: ActionType.ADD_BOOK,
         payload: newBook
-
     };
 }
 
@@ -17,11 +16,11 @@ export const updateBook = (oldData, data) => {
         }
     };
 }
+
 export const deleteBook = (book) => {
     return {
         type: ActionType.DELETE_BOOK,
         payload: book
-
     };
 }
 
@@ -29,7 +28,6 @@ export const addAuthor = (newPublisher) => {
     return {
         type: ActionType.ADD_AUTHOR,
         payload: newPublisher
-
     };
 }
 
@@ -47,7 +45,6 @@ export const deleteAuthor = (author) => {
     return {
         type: ActionType.DELETE_AUTHOR,
         payload: author
-
     };
 }
 
@@ -65,16 +62,13 @@ export const updatePublisher = (oldData, data) => {
             data,
             oldData
         }
-
     };
 }
-
 
 export const deletePublisher = (publisher) => {
     return {
         type: ActionType.DELETE_PUBLISHER,
         payload: publisher
-
     };
 }
 
@@ -87,4 +81,3 @@ export const deleteBooks = (type, name) => {
         }
     };
 }
-

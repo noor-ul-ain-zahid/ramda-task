@@ -5,124 +5,92 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-export default class PublisherModal extends React.Component {
+import { Field, reset, reduxForm, change } from 'redux-form';
+import { connect } from "react-redux";
+import { bindActionCreators } from 'redux';
+import { publisherValidator as validate } from '../../validators/formValidator'
+import { Field as renderField } from '../common/Field'
 
+class PublisherModal extends React.Component {
     constructor(props) {
         super(props);
+        this.resetValues = this.resetValues.bind(this);
+        this.submit = this.submit.bind(this);
+    }
+    componentWillUpdate(props) {
+        if (props.action === 'edit') {
+            this.props.change('name', props.publisher.name);
+            this.props.change('address', props.publisher.address);
+            this.props.change('books', props.publisher.books);
+        }
+    }
+    resetValues = () => {
+        this.props.reset('publisher');
+        this.props.handleClose()
+    }
+    submit = values => this.props.handleSubmit(values)
 
-        this.state = {
-            formData: {
-                name: '',
-                books: '',
-                address: ''
-            },
-            error:'',
-            title: ''
-        };
-
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
-    componentDidMount() {
-        ValidatorForm.addValidationRule('alreadyExists', (value) => {
-            if (this.state.error) {
-                return false;
-            }
-            return true;
-        });
-    }
-    handleChange(event) {
-        const { formData } = this.state;
-        formData[event.target.name] = event.target.value;
-        this.setState({ formData, error: '' });
-    }
-
-    handleSubmit() {
-        this.props.actionType(this.state.formData)
-    }
-    componentWillReceiveProps(props) {
-        if (props.action === 'edit')
-            this.setState({
-                formData: {
-                    name: props.publisher.name,
-                    books: props.publisher.books,
-                    address: props.publisher.address
-                },
-                error: props.error,
-                title: 'Edit Publisher Details'
-            })
-        else this.setState({
-            formData: {
-                name: '',
-                books: '',
-                address: ''
-            },
-            error: props.error,
-            title: 'Add Publisher Details'
-        })
-    }
     render() {
-        const { formData } = this.state
+        const { pristine, submitting} = this.props
+
         return (
             <Dialog
                 open={this.props.open}
                 onClose={this.props.handleClose}
                 aria-labelledby="form-dialog-title"
             >
-                <DialogTitle id="form-dialog-title">{this.state.title}</DialogTitle>
-                <ValidatorForm
-                    ref="form"
-                    onSubmit={this.handleSubmit}
-                >
+                <DialogTitle id="form-dialog-title">{this.props.title}</DialogTitle>
+                <form onSubmit={this.submit}>
                     <DialogContent>
-
                         <DialogContentText>
                             Enter Publisher details to make changes in the system.
                         </DialogContentText>
-                        <TextValidator
-                            label="Publisher Name"
-                            onChange={this.handleChange}
+                        <Field
                             name="name"
-                            id="publisherName"
-                            value={formData.name}
-                            validators={['required', 'alreadyExists']}
-                            errorMessages={['this field is required',
-                                'Publisher with this name already exists!\n Please try again...']}
-                            fullWidth
+                            component={renderField}
+                            label="Publisher Name"
                         />
-                        <br />
-                        <TextValidator
-                            label="Total Books"
-                            onChange={this.handleChange}
+                        <br/>
+                        <Field
                             name="books"
-                            type="number"
-                            id="publisherTotalBooks"
-                            value={formData.books}
-                            validators={['required']}
-                            errorMessages={['this field is required']}
-                            fullWidth
+                            component={renderField}
+                            label="Total Books"
                         />
-                        <br />
-                        <TextValidator
-                            label="Address"
-                            onChange={this.handleChange}
+                        <br/>
+                        <Field
                             name="address"
-                            id="publisherAddress"
-                            value={formData.address}
-                            validators={['required']}
-                            errorMessages={['this field is required']}
-                            fullWidth
+                            component={renderField}
+                            label="Address"
                         />
-                        <br />
+                        <br/>
                     </DialogContent>
-
                     <DialogActions>
-                        <Button onClick={this.props.handleClose} color="primary">Cancel</Button>
-                        <Button type="submit" color="primary">Submit</Button>
+                        <Button onClick={this.resetValues} color="primary">Cancel</Button>
+                        <Button type="submit" disabled={pristine || submitting} color="primary">Submit</Button>
                     </DialogActions>
-                </ValidatorForm>
+                </form>
             </Dialog>
         );
     }
 }
+function mapStateToProps(state) {
+    return {
+        publishers: state.publisherReducer.publishers
+    }
+};
+
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+        change,
+    }, dispatch)
+}
+const afterSubmit = (result, dispatch) =>
+    dispatch(reset('publisher'));
+
+PublisherModal = reduxForm({
+    form: 'publisher',
+    validate,
+    onSubmitSuccess: afterSubmit
+})(PublisherModal);
+
+export default connect(mapStateToProps, mapDispatchToProps)(PublisherModal);

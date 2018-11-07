@@ -20,10 +20,11 @@ export const del = (oldData, data) => {
     return newData
 }
 
-export const notExisting = (data, newData) => {
+export const notExisting = (data, newData,id) => {
+    //console.log(newData.name)
     const existing = filter(propEq('name', newData.name))
-    const differentIndex = reject(propEq('id', newData.id))
-    const check = compose(differentIndex, existing)(data).length == 0
+    const differentIndex = reject(propEq('id', id))
+    const check = compose(differentIndex,existing)(data).length === 0
     return check;
 }
 
@@ -31,4 +32,3 @@ export const deleteBooks = (data, type, name) => {
     const newData = reject(propEq(type, name))(data)
     return newData;
 }
-
